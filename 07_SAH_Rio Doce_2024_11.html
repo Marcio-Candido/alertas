@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Graf Doce</title>
+    <style>
+        .chart-container {
+            display: none; /* Oculta todos os iframes por padrão */
+            margin-top: 20px;
+            flex: 1 1 30%; /* Flexível, ocupa 30% da largura do contêiner */
+        }
+        .progress {
+            display: none; /* Oculta a barra de progresso por padrão */
+            width: 100%;
+            background-color: #f3f3f3;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            position: relative;
+            height: 20px;
+            margin-top: 10px;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #4caf50;
+            width: 0%;
+            transition: width 0.4s;
+        }
+        .checkbox-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* Cria 4 colunas */
+            gap: 10px; /* Espaçamento entre os itens */
+            margin-bottom: 20px;
+        }
+
+        .header-container {
+            display: flex;
+            align-items: center;
+            gap: 10px; /* Ajusta o espaço entre o título e o botão */
+            margin-bottom: 20px;
+        }
+
+        .save-button {
+            padding: 10px 20px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .save-button:hover {
+            background-color: #45a049;
+        }
+
+        /* Estilo flex para os gráficos */
+        .charts-wrapper {
+            display: flex;
+            flex-wrap: wrap; /* Permite que os gráficos se ajustem para novas linhas */
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        /* Media Query para telas pequenas (quando o zoom estiver reduzido ou em dispositivos pequenos) */
+        @media (max-width: 1200px) {
+            .chart-container {
+                flex: 1 1 45%; /* Cada gráfico ocupa 45% da largura em telas menores */
+            }
+        }
+
+        @media (max-width: 768px) {
+            .chart-container {
+                flex: 1 1 100%; /* Cada gráfico ocupa 100% da largura em telas ainda menores */
+            }
+        }
+
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Carrega a seleção armazenada ao abrir o arquivo
+            const storedSelection = JSON.parse(localStorage.getItem("selectedCharts")) || [];
+            storedSelection.forEach(id => {
+                const checkbox = document.getElementById(`check${id}`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    toggleChart(id);
+                }
+            });
+        });
+
+        function toggleChart(id) {
+            const chartContainer = document.getElementById(`chart${id}`);
+            const checkbox = document.getElementById(`check${id}`);
+            const progressBar = document.getElementById(`progress${id}`);
+            const iframe = document.getElementById(`iframe${id}`);
+
+            if (checkbox.checked) {
+                // Exibe a barra de progresso e oculta o gráfico
+                chartContainer.style.display = 'block';
+                progressBar.style.width = '0%'; // Reseta a barra
+                progressBar.parentElement.style.display = 'block'; // Mostra a barra
+
+                // Inicia o carregamento
+                iframe.onload = function() {
+                    progressBar.style.width = '100%'; // Completa a barra
+                    setTimeout(() => {
+                        progressBar.parentElement.style.display = 'none'; // Oculta a barra após 1 segundo
+                    }, 1000);
+                };
+
+                // Define a URL do iframe
+                iframe.src = `http://sace.sgb.gov.br/doce/rest/chart?ID=${id}`;
+            } else {
+                // Oculta o gráfico e a barra de progresso
+                chartContainer.style.display = 'none';
+                progressBar.parentElement.style.display = 'none'; 
+            }
+
+            saveSelection(); // Salva a seleção atual
+        }
+
+        function saveSelection() {
+            const checkboxes = document.querySelectorAll('.checkbox-container input[type="checkbox"]');
+            const selectedIds = Array.from(checkboxes)
+                .filter(checkbox => checkbox.checked)
+                .map(checkbox => checkbox.id.replace('check', ''));
+            localStorage.setItem("selectedCharts", JSON.stringify(selectedIds));
+        }
+
+        // Função para salvar as configurações ao clicar no botão "Salvar"
+        function saveChartsState() {
+            saveSelection();
+            alert("Configurações salvas com sucesso!");
+        }
+    </script>
+</head>
+<body bgcolor="FFFFFF">
+    <div class="header-container">
+        <h1>SAH Doce</h1>
+        <!-- Botão para salvar as seleções ao lado do título -->
+        <button class="save-button" onclick="saveChartsState()">Salvar Configurações</button>
+    </div>
+
+    <div class="checkbox-container">
+        
+
+
+	<label><input type="checkbox" id="check102" onclick="toggleChart(102)"> Ponte Nova</label>
+        <label><input type="checkbox" id="check8501" onclick="toggleChart(8501)" > Rio Piracicaba</label>
+        <label><input type="checkbox" id="check153" onclick="toggleChart(153)"> Nova Era</label>
+        <label><input type="checkbox" id="check8551" onclick="toggleChart(8551)"> Cachoeira dos Óculos</label>
+        <label><input type="checkbox" id="check151" onclick="toggleChart(151)"> Mário de Carvalho</label>
+        <label><input type="checkbox" id="check150" onclick="toggleChart(150)"> Belo Oriente</label>
+        <label><input type="checkbox" id="check152" onclick="toggleChart(152)"> Naque Velho</label>
+        <label><input type="checkbox" id="check50" onclick="toggleChart(50)"> Governador Valadares</label>
+        <label><input type="checkbox" id="check8553" onclick="toggleChart(8553)"> Tumiritinga</label>
+        <label><input type="checkbox" id="check155" onclick="toggleChart(155)"> Vila Matias</label>
+        <label><input type="checkbox" id="check53" onclick="toggleChart(53)"> Colatina</label>
+        <label><input type="checkbox" id="check8754" onclick="toggleChart(8754)"> Linhares</label>
+       
+
+
+
+
+
+    </div>
+
+    <br>
+
+    <!-- Contêiner flexível para os gráficos -->
+    <div class="charts-wrapper">
+
+
+
+
+        
+
+
+<div id="chart102" class="chart-container">
+        <div class="progress">
+            <div id="progress102" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe102" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+    </div>
+    <div id="chart8501" class="chart-container">
+        <div class="progress">
+            <div id="progress8501" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe8501" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+    </div>
+    <div id="chart153" class="chart-container">
+        <div class="progress">
+            <div id="progress153" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe153" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+    </div>
+    <div id="chart8551" class="chart-container">
+        <div class="progress">
+            <div id="progress8551" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe8551" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+    </div>
+    <div id="chart151" class="chart-container">
+        <div class="progress">
+            <div id="progress151" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe151" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+    </div>
+    <div id="chart150" class="chart-container">
+        <div class="progress">
+            <div id="progress150" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe150" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+    </div>
+    <div id="chart152" class="chart-container">
+        <div class="progress">
+            <div id="progress152" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe152" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+    </div>
+    <div id="chart50" class="chart-container">
+        <div class="progress">
+            <div id="progress50" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe50" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+    </div>
+    <div id="chart8553" class="chart-container">
+        <div class="progress">
+            <div id="progress8553" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe8553" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+    </div>
+    <div id="chart155" class="chart-container">
+        <div class="progress">
+            <div id="progress155" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe155" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+    </div>
+    <div id="chart53" class="chart-container">
+        <div class="progress">
+            <div id="progress53" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe53" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+    </div>
+    <div id="chart8754" class="chart-container">
+        <div class="progress">
+            <div id="progress8754" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe8754" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+    </div>
+    <div id="chart23" class="chart-container">
+        <div class="progress">
+            <div id="progress23" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe23" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+    </div>
+    <div id="chart32" class="chart-container">
+        <div class="progress">
+            <div id="progress32" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe32" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+    </div>
+    <div id="chart33" class="chart-container">
+        <div class="progress">
+            <div id="progress33" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe33" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+    </div>
+    <div id="chart24" class="chart-container">
+        <div class="progress">
+            <div id="progress24" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe24" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+    </div>
+    <div id="chart10" class="chart-container">
+        <div class="progress">
+            <div id="progress10" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe10" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+    </div>
+    <div id="chart46" class="chart-container">
+        <div class="progress">
+            <div id="progress46" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe46" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+    </div>
+    <div id="chart45" class="chart-container">
+        <div class="progress">
+            <div id="progress45" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe45" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+    </div>
+    <div id="chart47" class="chart-container">
+        <div class="progress">
+            <div id="progress47" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe47" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+    </div>
+    <div id="chart34" class="chart-container">
+        <div class="progress">
+            <div id="progress34" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe34" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+    </div>
+    <div id="chart28" class="chart-container">
+        <div class="progress">
+            <div id="progress28" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe28" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+    </div>
+    <div id="chart29" class="chart-container">
+        <div class="progress">
+            <div id="progress29" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe29" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+    </div>
+    <div id="chart30" class="chart-container">
+        <div class="progress">
+            <div id="progress30" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe30" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+
+ </div>
+    <div id="chart51" class="chart-container">
+        <div class="progress">
+            <div id="progress51" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe51" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+</div>
+    <div id="chart53" class="chart-container">
+        <div class="progress">
+            <div id="progress53" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe53" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+
+</div>
+    <div id="chart60" class="chart-container">
+        <div class="progress">
+            <div id="progress60" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe60" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+</div>
+    <div id="chart56" class="chart-container">
+        <div class="progress">
+            <div id="progress56" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe56" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+</div>
+    <div id="chart59" class="chart-container">
+        <div class="progress">
+            <div id="progress59" class="progress-bar"></div>
+        </div>
+        <iframe id="iframe59" width="800" height="500" scrolling="no" frameborder="1"></iframe>
+
+
+
+
+
+
+    </div>
+
+</body>
+</html>
